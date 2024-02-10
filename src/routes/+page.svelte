@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { baseURL } from '/src/config.ts'; // Base URL of your Strapi instance
 
-  const baseURL = 'http://localhost:1337'; // Base URL of your Strapi instance
   let carouselItems = [];
 
   onMount(async () => {

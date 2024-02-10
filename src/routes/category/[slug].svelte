@@ -1,0 +1,57 @@
+<script context="module" lang="ts">
+  import { baseURL } from '/src/config.ts';
+
+  export async function load({ params }) {
+      const { slug } = params;
+      const response = await fetch(`${baseURL}/api/categorias?filters[slug]=${slug}&populate=productos`);
+      if (response.ok) {
+          const data = await response.json();
+          if (data.data.length > 0) {
+              return {
+                  props: {
+                      category: data.data[0],
+                      categoriaProductos: data.data[0].attributes.productos.data,
+                      categoriaName: data.data[0].attributes.categoria
+                  }
+              };
+          }
+      }
+      // Handle cases where the category or products are not found or an error occurred
+      return {
+          props: {
+              categoriaProductos: [],
+              categoriaName: slug // Fallback to showing the slug if the category name can't be fetched
+          }
+      };
+  }
+</script>
+
+<script lang="ts">
+  export let categoriaProductos;
+  export let categoriaName;
+</script>
+
+<div data-theme="emerald" class="container px-4 mx-auto">
+  <h1 class="text-4xl font-bold text-center my-10">{categoriaName}</h1>
+  <!-- Products Section -->
+  {#if categoriaProductos && categoriaProductos.length > 0}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {#each categoriaProductos as producto}
+              <div class="card card-compact bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                  <figure>
+                      <img src={producto.attributes.foto || '/default-placeholder.png'} alt={producto.attributes.nombre} class="object-cover h-full w-full" />
+                  </figure>
+                  <div class="card-body">
+                      <h3 class="card-title">{producto.attributes.nombre}</h3>
+                      <div class="flex justify-between items-center mt-4">
+                          <span class="text-lg font-bold">${producto.attributes.precio}</span>
+                          <button class="btn btn-primary">Contactar</button>
+                      </div>
+                  </div>
+              </div>
+          {/each}
+      </div>
+  {:else}
+      <p>No products found for this category.</p>
+  {/if}
+</div>

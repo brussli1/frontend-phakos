@@ -1,6 +1,18 @@
 
 <script>
   import "tailwindcss/tailwind.css";
+  import { onMount } from 'svelte';
+  import { baseURL } from '/src/config.ts'; // Assuming baseURL is your Strapi base URL
+
+  let categoria = [];
+
+  onMount(async () => {
+    const response = await fetch(`${baseURL}/api/categorias`);
+    if (response.ok) {
+      const data = await response.json();
+      categoria = data.data;
+    }
+  });
 </script>
 
 <nav class="navbar bg-base-100 px-2 sm:px-4 py-2.5 rounded">
@@ -41,4 +53,19 @@
 	  </div>
 	</div>
   </nav>
-<slot />
+  <div class="flex">
+	<!-- Sidebar component or wherever your category links are generated -->
+	<aside class="menu bg-base-200 w-56 h-screen p-5">
+		<ul>
+		{#each categoria as category}
+			<li><a sveltekit:prefetch href={`/category/${category.attributes.slug}`}>{category.attributes.categoria}</a></li>
+		{/each}
+		</ul>
+	</aside>
+  
+	
+  
+	<main class="flex-grow">
+	  <slot />
+	</main>
+  </div>
