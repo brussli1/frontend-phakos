@@ -1,0 +1,99 @@
+<script lang="ts" context="module">
+  import type { Load } from '@sveltejs/kit';
+
+  // Define an interface for the product attributes
+  interface ProductAttributes {
+    id: number;
+    nombre: string;
+    Precio: number;
+    informacion_adicional: string;
+    slug: string;
+    // Add any other attributes you expect to receive
+    // For example, if you have images:
+    image_url?: string;
+  }
+
+  // Define an interface for the product structure
+  interface Product {
+    attributes: ProductAttributes;
+  }
+
+  // Define the structure of your API response
+  interface ApiResponse {
+    data: Product[];
+  }
+
+  export const load: Load = async ({ fetch }) => {
+    let products: Product[] = []; // Initialize with an empty array
+    let error: string | undefined;
+
+    try {
+      const response = await fetch('http://localhost:1337/api/products');
+      if (response.ok) {
+        const data: ApiResponse = await response.json();
+        products = data.data;
+      } else {
+        console.error('API fetch failed', response.statusText);
+        error = response.statusText;
+      }
+    } catch (e: unknown) { // Note the type annotation here
+      if (e instanceof Error) { // Type guard
+        console.error('Fetch error:', e.message);
+        error = e.message;
+      } else {
+        console.error('An unexpected error occurred');
+        error = 'An unexpected error occurred';
+      }
+    }
+
+    return {
+      props: {
+        products,
+        error,
+      }
+    };
+  }
+</script>
+
+<script lang="ts">
+  export let products: Product[];
+  export let error: string | undefined;
+</script>
+
+<!-- Your HTML here to display products -->
+<div class="container mx-auto">
+  <h1 class="text-2xl font-bold text-center my-5">Tienda de Phakos</h1>
+  <div class="grid grid-cols-3 gap-4">
+    {#each products as product}
+      <div class="card shadow-lg compact side bg-base-100">
+        <figure><img src="{product.attributes.image_url}" alt="{product.attributes.nombre}" /></figure>
+        <div class="card-body">
+          <h2 class="card-title">{product.attributes.nombre}</h2>
+          <p>{product.attributes.informacion_adicional}</p>
+          <p>Precio: ${product.attributes.Precio}</p>
+          <div class="card-actions justify-end">
+            <button class="btn btn-primary">Buy Now</button>
+          </div>
+        </div>
+      </div>
+    {/each}
+  </div>
+</div>
+
+{#if error}
+  <p>Error: {error}</p>
+{:else}
+  {#each products as product}
+    <!-- display your product -->
+    <div>
+      <h2>{product.attributes.nombre}</h2>
+      <!-- Other product details -->
+    </div>
+  {/each}
+{/if}
+
+<style>
+  /* Add any additional custom styles here */
+</style>
+
+
