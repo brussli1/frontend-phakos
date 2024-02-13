@@ -1,9 +1,10 @@
+
 <script context="module" lang="ts">
   import { baseURL } from '/src/config.ts';
 
   export async function load({ params }) {
       const { slug } = params;
-      const response = await fetch(`${baseURL}/api/categorias?filters[slug]=${slug}&populate=productos`);
+      const response = await fetch(`${baseURL}/api/categorias?filters[slug]=${slug}&populate=*`);
       if (response.ok) {
           const data = await response.json();
           if (data.data.length > 0) {
