@@ -1,7 +1,11 @@
-/** @type {import('tailwindcss').Config} */
+const daisyui = require('daisyui');
+
 module.exports = {
-  content: ['./src/routes/**/*.{svelte,js,ts}'],
-  plugins: [require('daisyui')],
+  content: ['./src/**/*.{html,js,svelte,ts}', './src/routes/**/*.{svelte,js,ts}'],
+  plugins: [daisyui],
+  theme: {
+    extend: {}
+  },
   daisyui: {
     themes: [
       "emerald",

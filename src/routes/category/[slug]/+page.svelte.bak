@@ -4,7 +4,7 @@
 
   export async function load({ params }) {
       const { slug } = params;
-      const response = await fetch(`${baseURL}/api/categorias?filters[slug]=${slug}&populate=*`);
+      const response = await fetch(`${baseURL}/api/categorias?filters[slug]=${slug}&populate=productos`);
       if (response.ok) {
           const data = await response.json();
           if (data.data.length > 0) {

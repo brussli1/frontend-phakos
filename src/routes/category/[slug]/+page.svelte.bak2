@@ -1,0 +1,79 @@
+<script context="module" lang="ts">
+  import { error, type Load } from '@sveltejs/kit';
+  import type { PageLoad } from './$types';
+
+  // Define TypeScript types for fetched data
+  type Product = {
+    id: number;
+    attributes: {
+      nombre: string;
+      descripcion: string;
+      precio: number;
+      slug: string;
+      foto?: {
+        data: {
+          attributes: {
+            url: string;
+          }
+        }[]
+      };
+    };
+  };
+
+  type CategoryDetails = {
+    categoria: string;
+    slug: string;
+    productos: {
+      data: Product[];
+    };
+  };
+
+  export const load: Load = async ({ params }) => {
+    const { slug } = params;
+
+    try {
+      const strapiBaseURL = 'http://168.138.133.221:1337';
+      const response = await fetch(`${strapiBaseURL}/api/categorias?filters[slug]=${slug}&populate=*`);
+      if (response.ok) {
+        const data = await response.json();
+        const categoryDetails = data.data[0]; // Assuming the first match is the desired category
+        if (!categoryDetails) {
+          throw error(404, `Category not found for slug: ${slug}`);
+        }
+        return {
+          props: {
+            categoryDetails: categoryDetails.attributes
+          }
+        };
+      } else {
+        throw error(500, 'Failed to fetch category details');
+      }
+    } catch (err) {
+      throw error(500, err.message);
+    }
+  };
+</script>
+
+<script lang="ts">
+  export let categoryDetails: CategoryDetails;
+</script>
+
+<div>
+  <h1 class="text-4xl font-bold">{categoryDetails.categoria}</h1>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+    {#each categoryDetails.productos.data as producto}
+      <div class="card bg-base-100 shadow-xl">
+        <figure>
+          <img src={producto.attributes.foto?.data?.[0]?.attributes?.url || '/default-placeholder.png'} alt={producto.attributes.nombre} />
+        </figure>
+        <div class="card-body">
+          <h2 class="card-title">{producto.attributes.nombre}</h2>
+          <p>{producto.attributes.descripcion}</p>
+          <div class="card-actions justify-end">
+            <span class="text-lg font-bold">${producto.attributes.precio}</span>
+          </div>
+        </div>
+      </div>
+    {/each}
+  </div>
+</div>

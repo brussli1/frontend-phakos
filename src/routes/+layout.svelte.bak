@@ -4,14 +4,10 @@
 	// Use the correct import path with alias and without .ts extension
 	import { baseURL } from '@/config';
 	import type { Category } from '../types'; 
+	import { goto } from '$app/navigation';// Assuming you have or will create a type definition
   
 	let categories: Category[] = []; // Renamed for clarity and typed
-	function redirectToWhatsApp() {
-    const phoneNumber = '+595971282908';
-    const message = encodeURIComponent("Buenas, te contacto desde el sitio web de Phakos");
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
-    }
+  
 	onMount(async () => {
 	  try {
 		const response = await fetch(`${baseURL}/api/categorias?populate=*`);
@@ -34,7 +30,7 @@
 	<div class="container flex flex-wrap justify-between items-right mx-auto">
 	  <a href="/" class="flex items-left"></a>
 	  <div class="flex md:order-2">
-		<button class="btn btn-primary" on:click={redirectToWhatsApp}>Whatsapp</button>
+		<button class="btn btn-primary">Whatsapp</button>
 		<div class="dropdown dropdown-end">
 		  <label tabindex="0" class="btn btn-ghost btn-circle avatar">
 			<div class="w-10 rounded-full">
@@ -53,11 +49,11 @@
 		  <li><a href="/productos" class="btn btn-ghost font-bold">Productos</a></li>
 		  <li><a href="/marcas" class="btn btn-ghost font-bold">Marcas</a></li>
 		  <li><a href="/latest" class="btn btn-ghost font-bold">Lo Último</a></li>
-		  <li><a href="/promociones" class="btn btn-ghost font-bold">Promociones</a></li>
-		  <li><a href="/usados" class="btn btn-ghost font-bold">Usados</a></li>
-		  <li><a href="/alquiler" class="btn btn-ghost font-bold">Alquiler</a></li>
-		  <li><a href="/soporte" class="btn btn-ghost font-bold">Soporte</a></li>
-		  <li><a href="/contacto" class="btn btn-ghost font-bold">Contacto</a></li>
+		  <li><a href="/clearance" class="btn btn-ghost font-bold">Promociones</a></li>
+		  <li><a href="/used" class="btn btn-ghost font-bold">Usados</a></li>
+		  <li><a href="/leasing" class="btn btn-ghost font-bold">Alquiler</a></li>
+		  <li><a href="/support" class="btn btn-ghost font-bold">Soporte</a></li>
+		  <li><a href="/contact" class="btn btn-ghost font-bold">Contacto</a></li>
 		  <!-- Additional items... -->
 	  </ul>
 		  <!-- Additional navigation items... -->

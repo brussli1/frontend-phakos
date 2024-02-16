@@ -1,0 +1,73 @@
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import { baseURL } from '@/config'; // Adjust the import path as necessary
+
+  // Define the interface outside of any reactive statements or lifecycle functions
+  interface CarouselItem {
+      id: string;
+      url: string;
+      alt: string;
+  }
+
+  // Correctly type the carouselItems array
+  let carouselItems: CarouselItem[] = [];
+
+  onMount(async () => {
+      try {
+          const response = await fetch(`${baseURL}/api/carrusels?populate=*`);
+          if (response.ok) {
+              const data = await response.json();
+              // Ensure proper typing and handling inside the map function
+              carouselItems = data.data[0].attributes.carrusel.data.map((item: any, index: number) => {
+                  const imgData = item.attributes;
+                  const imageUrl = imgData.url.startsWith('/') ? `${baseURL}${imgData.url}` : imgData.url;
+                  const altText = imgData.alternativeText || `Carousel image ${index + 1}`;
+                  return { id: `item${index + 1}`, url: imageUrl, alt: altText };
+              }).filter(Boolean); // Filter out any falsy values to ensure the array only contains CarouselItem objects
+          } else {
+              console.error('API fetch failed:', response.statusText);
+          }
+      } catch (error) {
+          console.error('Fetch error:', error);
+      }
+  });
+</script>
+
+  
+  
+  <div class="container mx-auto px-4">
+  <nav class="bg-red-500 text-white p-4">
+    <!-- Navigation content here -->
+  </nav>
+  
+  <header class="my-5 text-center">
+    <h1 class="text-3xl mb-5">Explora Nuestros Mejores Productos</h1>
+    <div class="carousel w-full">
+      {#each carouselItems as item (item.id)}
+        <div id={item.id} class="carousel-item w-full">
+          <img src={item.url} class="responsive-img" alt={item.alt} />
+        </div>
+      {/each}
+    </div>
+  
+    <div class="flex justify-center w-full h-12 py-2 gap-2">
+      {#each carouselItems as item (item.id)}
+        <a href={`#${item.id}`} class="btn btn-xs">{item.id.replace('item', '')}</a>
+      {/each}
+    </div>
+  </header>
+  
+  <footer class="bg-red-500 text-white p-4 text-center">
+    <!-- Footer content here -->
+  </footer>
+  </div>
+  
+  
+  <style>
+    .responsive-img {
+      width: 100%;
+      max-height: 400px; /* Adjust this value as needed */
+      object-fit: cover;
+    }
+  </style>
+  
