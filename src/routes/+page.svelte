@@ -9,53 +9,78 @@
     }
 
     interface Product {
-        id: number;
-        attributes: {
-            nombre: string;
-            descripcion: string;
-            precio: number;
-            slug: string;
+      attributes: {
+        nombre: string;
+        precio: number;
+        slug: string;
+        foto: {
+          data: {
+              attributes: {
+                url: string;
+              };
+          } [] |  null;
         };
+      };
+       imageUrl?: string;
     }
 
     let carouselItems: CarouselItem[] = [];
     let productos: Product[] = [];
     let popularProducts: Product[] = [];
+    let counter = 1
 
     // Fetch Carousel Items
     onMount(async () => {
-        try {
-            const response = await fetch(`${baseURL}/api/carrusels?populate=*`);
-            if (response.ok) {
-                const data = await response.json();
-                carouselItems = data.data[0].attributes.carrusel.data.map((item: any, index: number) => {
-                    const imgData = item.attributes;
-                    const imageUrl = imgData.url.startsWith('/') ? `${baseURL}${imgData.url}` : imgData.url;
-                    const altText = imgData.alternativeText || `Carousel image ${index + 1}`;
-                    return { id: `item${index + 1}`, url: imageUrl, alt: altText };
-                }).filter(Boolean);
-            } else {
-                console.error('API fetch failed:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Fetch error:', error);
+    try {
+        const response = await fetch(`${baseURL}/api/carrusels?populate=*`);
+        if (response.ok) {
+        const data = await response.json();
+        carouselItems = data.data.map((carouselEntry) => {
+            return carouselEntry.attributes.carrusel.data.map((item, index) => {
+            const imgData = item.attributes;
+            const imageUrl = imgData.url.startsWith('/') ? `${baseURL}${imgData.url}` : imgData.url;
+            const altText = imgData.alternativeText || `Carousel image ${index + 1}`;
+            // Use carousel entry slug for each item, assuming it matches the product slug
+            const slug = carouselEntry.attributes.slug; 
+            const itemID = `item${counter++}`;
+            return { id: itemID, url: imageUrl, alt: altText, slug: slug };
+            });
+        }).flat().filter(Boolean); // Flatten in case of multiple carousel entries and filter out any non-truthy values
+        } else {
+        console.error('API fetch failed:', response.statusText);
         }
+    } catch (error) {
+        console.error('Fetch error:', error);
+    }
     });
 
-    // Fetch "Lo Nuevo" Products
+
+    //lonuevo
     onMount(async () => {
-        try {
-            const response = await fetch(`${baseURL}/api/lo-nuevos?populate=*`);
-            if (response.ok) {
-                const data = await response.json();
-                productos = data.data[0].attributes.productos.data;
-            } else {
-                console.error('API fetch failed:', response.statusText);
+            try {
+                const response = await fetch(`${baseURL}/api/lo-nuevos?populate[productos][populate]=foto`);
+                if (response.ok) {
+                    const data = await response.json();
+                    // Accessing the nested 'productos' array within the first 'lo-nuevos' entry
+                    productos = data.data[0].attributes.productos.data.map((producto) => {
+                        // Assuming 'foto' is directly under 'attributes' and has a 'data' array
+                        const imageUrl = producto.attributes.foto?.data?.[0]?.attributes?.url
+                            ? `${baseURL}${producto.attributes.foto.data[0].attributes.url}`
+                            : 'default-placeholder.png'; // Providing a default image
+                        return {
+                            ...producto.attributes,
+                            id: producto.id,
+                            imageUrl: imageUrl,
+                        };
+                    });
+                } else {
+                    console.error('API fetch failed:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
             }
-        } catch (error) {
-            console.error('Fetch error:', error);
-        }
-    });
+        });
+
 
     
 
@@ -65,99 +90,134 @@
 
         // New fetch call for "Popular" products
         try {
-            const response = await fetch(`${baseURL}/api/populars?populate=*`);
+            const response = await fetch(`${baseURL}/api/populars?populate[productos][populate]=foto`);
             if (response.ok) {
                 const data = await response.json();
-                popularProducts = data.data[0].attributes.productos.data;
+                // Accessing the nested 'productos' array within the first 'popular' entry
+                productos = data.data[0].attributes.productos.data.map((producto) => {
+                    // Assuming 'foto' is directly under 'attributes' and has a 'data' array
+                    const imageUrl = producto.attributes.foto?.data?.[0]?.attributes?.url
+                        ? `${baseURL}${producto.attributes.foto.data[0].attributes.url}`
+                        : 'default-placeholder.png'; // Providing a default image
+                    return {
+                        ...producto.attributes,
+                        id: producto.id,
+                        imageUrl: imageUrl,
+                    };
+                });
             } else {
-                console.error('API fetch failed for popular products:', response.statusText);
+                console.error('API fetch failed:', response.statusText);
             }
         } catch (error) {
-            console.error('Fetch error for popular products:', error);
+            console.error('Fetch error:', error);
         }
     });
+
 </script>
+<div data-theme="emerald" class="flex bg-transparent ">	
+    <div class="container mx-auto px-4 rounded ">
+        <header class="my-5 text-center">
+            <h1 class="text-3xl mb-5 border-b tracking-wide shadow py-2 font-semibold bg-gray-200">Explora Nuestros Mejores Productos</h1>
+            <div class="carousel w-full ">
+                {#each carouselItems as item (item.id)}
+                  <div id={item.id} class="carousel-item w-full flex justify-center ">
+                    <!-- Navigate to the product page based on the slug -->
+                    <a href={`/productos/${item.slug}`} class= "justify-center">
+                      <img src={item.url} class="responsive-img w-full  justify-center" alt={item.alt} />
+                    </a>
+                  </div>
+                {/each}
+            </div>
+              
+    
+            <div class="flex justify-center w-full h-12 py-2 gap-2">
+                {#each carouselItems as item (item.id)}
+                    <a href={`#${item.id}`} class="btn btn-xs">{item.id.replace('item', '')}</a>
+                {/each}
+            </div>
 
-<div class="container mx-auto px-4">
-    <nav class="bg-red-500 text-white p-4">
-        <!-- Navigation content here -->
-    </nav>
 
-    <header class="my-5 text-center">
-        <h1 class="text-3xl mb-5">Explora Nuestros Mejores Productos</h1>
-        <div class="carousel w-full">
-            {#each carouselItems as item (item.id)}
-                <div id={item.id} class="carousel-item w-full">
-                    <img src={item.url} class="responsive-img" alt={item.alt} />
-                </div>
-            {/each}
-        </div>
-
-        <div class="flex justify-center w-full h-12 py-2 gap-2">
-            {#each carouselItems as item (item.id)}
-                <a href={`#${item.id}`} class="btn btn-xs">{item.id.replace('item', '')}</a>
-            {/each}
-        </div>
-    </header>
-
-    <!-- "Lo Nuevo" Products Section -->
-    {#if productos.length > 0}
-        <div class="my-10">
-            <h1 class="text-4xl font-bold text-center">Lo Nuevo</h1>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                {#each productos as producto}
-                    <div class="card bg-base-100 shadow-xl">
-                        <figure class="h-96 bg-gray-200">
-                            <img src="/default-placeholder.png" alt={producto.attributes.nombre} class="object-cover h-full w-full" />
-                        </figure>
-                        <div class="card-body">
-                            <h2 class="card-title text-2xl font-bold">{producto.attributes.nombre}</h2>
-                            <p class="my-4">{producto.attributes.descripcion}</p>
-                            <span class="text-lg font-bold">${producto.attributes.precio}</span>
-                        </div>
+            <!--div class="carousel w-full">
+                {#each carouselItems as item (item.id)}
+                    <div id={item.id} class="carousel-item w-full">
+                        <img src={item.url} class="responsive-img" alt={item.alt} />
                     </div>
                 {/each}
             </div>
-        </div>
-    {:else}
-        <p class="text-center">Loading...</p>
-    {/if}
+            <div class="flex justify-center w-full h-12 py-2 gap-2">
+                {#each carouselItems as item (item.id)}
+                    <a href={`#${item.id}`} class="btn btn-xs">{item.id.replace('item', '')}</a>
+                {/each}
+            </div-->
+        </header>
+
+        <!-- "Lo Nuevo" Products Section -->
+
+        <div class="divider"></div> 
+            <!-- Products Section -->
+            {#if productos.length > 0}
+            <div class="container px-4 mx-auto">
+                <h1 class="text-4xl font-bold text-center my-10">Lo Nuevo</h1>
+                <!-- <h2 class="text-2xl font-bold mb-6">Productos</h2> -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {#each productos as producto}
+                        <!-- Use rel="prefetch" for SvelteKit prefetching and replace {producto.imageUrl} with actual image path -->
+                        <a href={`/productos/${producto.slug}`} class="card card-compact bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300" rel="prefetch">
+                            <figure class="h-48 bg-gray-200">
+                                <!-- Apply lazy loading for images. Adjust the src attribute as needed. -->
+                                <img src={producto.imageUrl || '/default-placeholder.png'} alt={producto.nombre} class="object-cover h-full w-full" loading="lazy" />
+                            </figure>
+                            <div class="card-body">
+                                <h3 class="card-title text-base md:text-lg font-bold">{producto.nombre}</h3>
+                                <div class="flex flex-wrap justify-between items-center mt-4 gap-2">
+                                    <span class="text-sm md:text-lg font-bold">${producto.precio}</span>
+                                    <button class="btn btn-primary text-xs md:text-base px-2 md:px-4 py-1 md:py-2">Contactar</button>
+                                </div>
+                            </div>                        
+                        </a>
+                    {/each}
+                </div>
+            </div>
+            {:else}
+            <p class="text-center">Cargando...</p>
+            {/if}
 
         <!-- "Popular" Products Section -->
-    {#if popularProducts.length > 0}
-    <div class="container mx-auto my-10">
-        <h1 class="text-4xl font-bold text-center">Popular</h1>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-            {#each popularProducts as producto}
-                <div class="card bg-base-100 shadow-xl">
-                    <figure class="h-96 bg-gray-200">
-                        <!-- Placeholder image; adjust as needed based on your data structure -->
-                        <img src="/default-placeholder.png" alt={producto.attributes.nombre} class="object-cover h-full w-full" />
-                    </figure>
-                    <div class="card-body">
-                        <h2 class="card-title text-2xl font-bold">{producto.attributes.nombre}</h2>
-                        <p class="my-4">{producto.attributes.descripcion}</p>
-                        <span class="text-lg font-bold">${producto.attributes.precio}</span>
-                        <!-- Additional product details as needed -->
-                    </div>
+        <div class="divider"></div> 
+        <!-- Popular Products Section -->
+        {#if productos.length > 0}
+            <div class="container px-4 mx-auto">
+                <h1 class="text-4xl font-bold text-center my-10">Popular</h1>
+                <h2 class="text-2xl font-bold mb-6">Productos Populares</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {#each productos as producto}
+                        <!-- Use rel="prefetch" for SvelteKit prefetching and replace {producto.imageUrl} with actual image path -->
+                        <a href={`/productos/${producto.slug}`} class="card card-compact bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300" rel="prefetch">
+                            <figure class="h-48 bg-gray-200">
+                                <!-- Apply lazy loading for images. Adjust the src attribute as needed. -->
+                                <img src={producto.imageUrl || '/default-placeholder.png'} alt={producto.nombre} class="object-cover h-full w-full" loading="lazy" />
+                            </figure>
+                            <div class="card-body">
+                                <h3 class="card-title text-base md:text-lg font-bold">{producto.nombre}</h3>
+                                <div class="flex flex-wrap justify-between items-center mt-4 gap-2">
+                                    <span class="text-sm md:text-lg font-bold">${producto.precio}</span>
+                                    <button class="btn btn-primary text-xs md:text-base px-2 md:px-4 py-1 md:py-2">Contactar</button>
+                                </div>
+                            </div>                        
+                        </a>
+                    {/each}
                 </div>
-            {/each}
-        </div>
-    </div>
-    {:else}
-    <p class="text-center">Loading popular products...</p>
-    {/if}
-
-
-    <footer class="bg-red-500 text-white p-4 text-center mt-10">
-        <!-- Footer content here -->
-    </footer>
-</div>
-
+            </div>
+        {:else}
+            <p class="text-center">Cargando...</p>
+        {/if}
+    </div>  
+</div>	
+<div class="divider"></div> 
 <style>
     .responsive-img {
         width: 100%;
         max-height: 400px; /* Adjust this value as needed */
-        object-fit: cover;
     }
+    
 </style>

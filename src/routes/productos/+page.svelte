@@ -41,11 +41,11 @@
     });
   </script>
     
-  <div data-theme="emerald" class="container px-4 mx-auto">
-    <h1 class="text-4xl font-bold text-center my-10">Tienda</h1>
+    
     
     <!-- Products Section -->
-    <div>
+    <div class="container px-4 mx-auto">
+        <h1 class="text-4xl font-bold text-center my-10">Tienda</h1>
         <h2 class="text-2xl font-bold mb-6">Productos</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {#each productos as producto}
@@ -66,7 +66,6 @@
             {/each}
         </div>
     </div>
-  </div>
   
   <style>
     /* Custom styles if needed */

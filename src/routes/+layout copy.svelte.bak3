@@ -1,0 +1,80 @@
+<script lang="ts">
+	import "tailwindcss/tailwind.css";
+	
+	import { onMount } from 'svelte';
+	// Use the correct import path with alias and without .ts extension
+	import { baseURL } from '@/config';
+	import type { Category } from '../types'; 
+	import { phoneNumber } from '@/config';
+	let categories: Category[] = []; // Renamed for clarity and typed
+	
+	function redirectToWhatsApp() {
+    const message = encodeURIComponent("Buenas, te contacto desde el sitio web de Phakos");
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
+    }
+	onMount(async () => {
+	  try {
+		const response = await fetch(`${baseURL}/api/categorias?populate=*`);
+		if (response.ok) {
+		  const data = await response.json();
+		  categories = data.data;
+		} else {
+		  console.error('Failed to fetch categories', response.statusText);
+		}
+	  } catch (error) {
+		console.error('Fetch error:', error);
+	  }
+	});
+  </script>
+  
+  <nav class="navbar bg-base-100 px-2 sm:px-4 py-2.5 rounded">
+	<a href="/" class="flex items-left">
+	  <img src="/logo-phakos.png" alt="PHAKOS" class="h-12 mr-1">
+	</a>
+	<div class="container flex flex-wrap justify-between items-right mx-auto">
+	  <a href="/" class="flex items-left"></a>
+	  <div class="flex md:order-2">
+		<button class="btn btn-primary" on:click={redirectToWhatsApp}>Whatsapp</button>
+		<div class="dropdown dropdown-end">
+		  <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+			<div class="w-10 rounded-full">
+			  <img src="path_to_your_avatar_image" alt="User Menu"/> <!-- Fixed attribute from 'asrc' to 'src' -->
+			</div>
+		  </label>
+		  <ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
+			<li><a href="/profile">Profile</a></li>
+			<li><a href="/settings">Settings</a></li>
+			<li><a href="/logout">Logout</a></li>
+		  </ul>
+		</div>
+	  </div>
+	  <div class="w-full md:block md:w-auto" id="navbar-default">
+		<ul class="flex flex-col p-4 mt-4 bg-gray-50 rounded-lg border border-gray-100 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-white dark:bg-gray-700 md:dark:bg-gray-800 dark:border-gray-700">
+		  <li><a href="/productos" class="btn btn-ghost font-bold">Productos</a></li>
+		  <li><a href="/marcas" class="btn btn-ghost font-bold">Marcas</a></li>
+		  <li><a href="/latest" class="btn btn-ghost font-bold">Lo Último</a></li>
+		  <li><a href="/promociones" class="btn btn-ghost font-bold">Promociones</a></li>
+		  <li><a href="/usados" class="btn btn-ghost font-bold">Usados</a></li>
+		  <li><a href="/alquiler" class="btn btn-ghost font-bold">Alquiler</a></li>
+		  <li><a href="/soporte" class="btn btn-ghost font-bold">Soporte</a></li>
+		  <li><a href="/contacto" class="btn btn-ghost font-bold">Contacto</a></li>
+		  <!-- Additional items... -->
+	  </ul>
+		  <!-- Additional navigation items... -->
+	  </div>
+	</div>
+  </nav>
+  <div class="flex">
+	<aside class="menu bg-base-200 w-54 h-screen">
+	  <ul>
+		{#each categories as category} <!-- Renamed to 'categories' -->
+		<li><a href={`/category/${category.attributes.slug}`} on:click|preventDefault={() => window.location.href = `/category/${category.attributes.slug}`}>{category.attributes.categoria}</a></li>
+		{/each}
+	  </ul>
+	</aside>
+	<main class="flex-grow p-4">
+	  <slot />
+	</main>
+  </div>
+  

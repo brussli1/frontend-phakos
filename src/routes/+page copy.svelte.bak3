@@ -1,0 +1,179 @@
+<script lang="ts">
+    import { onMount } from 'svelte';
+    import { baseURL } from '@/config';
+
+    interface CarouselItem {
+        id: string;
+        url: string;
+        alt: string;
+    }
+
+    interface Product {
+        id: number;
+        attributes: {
+            nombre: string;
+            descripcion: string;
+            precio: number;
+            slug: string;
+        };
+    }
+
+    let carouselItems: CarouselItem[] = [];
+    let productos: Product[] = [];
+    let popularProducts: Product[] = [];
+
+    // Fetch Carousel Items
+    onMount(async () => {
+        try {
+            const response = await fetch(`${baseURL}/api/carrusels?populate=*`);
+            if (response.ok) {
+                const data = await response.json();
+                carouselItems = data.data[0].attributes.carrusel.data.map((item: any, index: number) => {
+                    const imgData = item.attributes;
+                    const imageUrl = imgData.url.startsWith('/') ? `${baseURL}${imgData.url}` : imgData.url;
+                    const altText = imgData.alternativeText || `Carousel image ${index + 1}`;
+                    return { id: `item${index + 1}`, url: imageUrl, alt: altText };
+                }).filter(Boolean);
+            } else {
+                console.error('API fetch failed:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+        }
+    });
+
+    // Fetch "Lo Nuevo" Products
+    onMount(async () => {
+        try {
+            const response = await fetch(`${baseURL}/api/lo-nuevos?populate=*`);
+            if (response.ok) {
+                const data = await response.json();
+                productos = data.data[0].attributes.productos.data;
+            } else {
+                console.error('API fetch failed:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+        }
+    });
+
+    
+
+// Fetch "Popular" Products
+    onMount(async () => {
+        // Previous fetch calls remain unchanged
+
+        // New fetch call for "Popular" products
+        try {
+            const response = await fetch(`${baseURL}/api/populars?populate=*`);
+            if (response.ok) {
+                const data = await response.json();
+                popularProducts = data.data[0].attributes.productos.data;
+            } else {
+                console.error('API fetch failed for popular products:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Fetch error for popular products:', error);
+        }
+    });
+</script>
+
+<div class="container mx-auto px-4">
+    <nav class="bg-red-500 text-white p-4">
+        <!-- Navigation content here -->
+    </nav>
+
+    <header class="my-5 text-center">
+        <h1 class="text-3xl mb-5">Explora Nuestros Mejores Productos</h1>
+        <div class="carousel w-full">
+            {#each carouselItems as item (item.id)}
+                <div id={item.id} class="carousel-item w-full">
+                    <img src={item.url} class="responsive-img" alt={item.alt} />
+                </div>
+            {/each}
+        </div>
+
+        <div class="flex justify-center w-full h-12 py-2 gap-2">
+            {#each carouselItems as item (item.id)}
+                <a href={`#${item.id}`} class="btn btn-xs">{item.id.replace('item', '')}</a>
+            {/each}
+        </div>
+    </header>
+
+    <!-- "Lo Nuevo" Products Section -->
+    <div data-theme="emerald" class="container px-4 mx-auto">
+        <h1 class="text-4xl font-bold text-center my-10">Lo Nuevo</h1>
+        
+        <!-- Products Section -->
+        {#if productos.length > 0}
+          <div>
+            <h2 class="text-2xl font-bold mb-6">Productos</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {#each productos as producto}
+                    <!-- Use rel="prefetch" for SvelteKit prefetching and replace {producto.imageUrl} with actual image path -->
+                    <a href={`/productos/${producto.attributes.slug}`} class="card card-compact bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300" rel="prefetch">
+                        <figure class="h-48 bg-gray-200">
+                            <!-- Apply lazy loading for images. Adjust the src attribute as needed. -->
+                            <img src={producto.imageUrl || '/default-placeholder.png'} alt={producto.attributes.nombre} class="object-cover h-full w-full" loading="lazy" />
+                        </figure>
+                        <div class="card-body">
+                            <h3 class="card-title">{producto.attributes.nombre}</h3>
+                            <div class="flex justify-between items-center mt-4">
+                                <span class="text-lg font-bold">${producto.attributes.precio}</span>
+                                <button class="btn btn-primary">Contactar</button>
+                            </div>
+                        </div>
+                    </a>
+                {/each}
+            </div>
+          </div>
+        {:else}
+          <p class="text-center">Cargando...</p>
+        {/if}
+      </div>
+
+    <!-- "Popular" Products Section -->
+    <div data-theme="emerald" class="container px-4 mx-auto">
+    <h1 class="text-4xl font-bold text-center my-10">Popular</h1>
+    <!-- Popular Products Section -->
+    {#if popularProducts.length > 0}
+        <div>
+        <h2 class="text-2xl font-bold mb-6">Productos Populares</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {#each popularProducts as producto}
+                <!-- Use rel="prefetch" for SvelteKit prefetching and adjust the href to your product details route -->
+                <a href={`/productos/${producto.attributes.slug}`} class="card card-compact bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300" rel="prefetch">
+                    <figure class="h-48 bg-gray-200">
+                        <!-- Apply lazy loading for images. Adjust the src attribute according to your actual image source. -->
+                        <img src={producto.imageUrl || '/default-placeholder.png'} alt={producto.attributes.nombre} class="object-cover h-full w-full" loading="lazy" />
+                    </figure>
+                    <div class="card-body">
+                        <h3 class="card-title">{producto.attributes.nombre}</h3>
+                        <div class="flex justify-between items-center mt-4">
+                            <span class="text-lg font-bold">${producto.attributes.precio}</span>
+                            <!-- Optionally, you can include a button or other interactive elements here -->
+                            <button class="btn btn-primary">Contactar</button>
+                        </div>
+                    </div>
+                </a>
+            {/each}
+        </div>
+        </div>
+    {:else}
+        <p class="text-center">Cargando...</p>
+    {/if}
+    </div>
+
+
+    <footer class="bg-red-500 text-white p-4 text-center mt-10">
+        <!-- Footer content here -->
+    </footer>
+</div>
+
+<style>
+    .responsive-img {
+        width: 100%;
+        max-height: 400px; /* Adjust this value as needed */
+        object-fit: cover;
+    }
+</style>
