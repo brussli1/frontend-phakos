@@ -95,6 +95,7 @@
 			<div class="absolute inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center">
 				<div class="bg-white rounded-lg shadow-lg p-4 md:p-6">
 					<ul class="menu menu-vertical bg-gray-50 rounded-lg border border-gray-100 text-sm font-medium">
+						<li><a href="/" class="menu-item" on:click={() => $isMenuOpen = false}>Inicio</a></li>
 						<li><a href="/productos" class="menu-item" on:click={() => $isMenuOpen = false}>Productos</a></li>
 						<li><a href="/marcas" class="menu-item" on:click={() => $isMenuOpen = false}>Marcas</a></li>
 						<li><a href="/latest" class="menu-item" on:click={() => $isMenuOpen = false}>Lo Último</a></li>
@@ -122,37 +123,51 @@
 		<slot />
 		</main>
 	</div>
-	<footer class="footer grid bg-neutral text-white p-10">
-			<div>
-				<img src="/logo-phakos.png" alt="PHAKOS Logo" class="h-20">
-				<p>
-					Tel: 0985366405<br>
-					Cnel. Vicente Machuca, San Lorenzo<br>
-					td.phakos@gmail.com
-				</p>
+	<footer class="footer p-10 bg-neutral text-neutral-content">
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+		  <!-- Sección de Contacto Mejorada -->
+		  <div>
+			<div class="flex flex-col">
+			<a href="/" class="flex items-center mb-4">
+			  <img src="/logo-phakos.png" alt="PHAKOS Logo" class="h-20 mr-2">
+			</a>
 			</div>
-			
-			<div>
-				<span class="footer-title">Servicios</span>
-				<p>Venta de instrumentos, insumos y equipos oftalmológicos.</p>
+		  </div>
+		  <div class="p-4 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg shadow-lg text-white">
+			<div class="flex flex-col">
+			<a href="/contacto" class="link link-hover"> Contáctanos</a>
+			<p>Tel: 0985366405</p>
+			<a href="/mapa" class="link link-hover">Cnel. Vicente Machuca, San Lorenzo</a>
+			<p>td.phakos@gmail.com</p>
 			</div>
-		
-			<div>
-				<span class="footer-title">Compañía</span>
-				<!-- Example of using icons -->
-				<a class="link link-hover text-white hover:text-gray-200"><i class="fas fa-info-circle mr-2"></i>Acerca de</a>
-				<a class="link link-hover text-white hover:text-gray-200"><i class="fas fa-briefcase mr-2"></i>Empleo</a>
-				<a class="link link-hover text-white hover:text-gray-200"><i class="fas fa-envelope mr-2"></i>Contacto</a>
-				<a class="link link-hover text-white hover:text-gray-200"><i class="fas fa-map-marker-alt mr-2"></i>Localizaciones</a>
+		  </div>
+	  
+		  <!-- Secciones del Footer -->
+		  <div>
+			<div class="flex flex-col">
+			<span class="footer-title">Servicios</span>
+			<a href="/category" class="link link-hover"> Venta de instrumentos, insumos y equipos oftalmológicos.</a>
 			</div>
-		
-			<div>
-				<span class="footer-title">Legal</span>
-				<a class="link link-hover text-white hover:text-gray-200">Términos de uso</a>
-				<a class="link link-hover text-white hover:text-gray-200">Política de privacidad</a>
-				<a class="link link-hover text-white hover:text-gray-200">Política de cookies</a>
+		  </div>
+	  
+		  <div>
+			<div class="flex flex-col">
+			<span class="footer-title">Compañía</span>
+			<a href="/contacto" class="link link-hover">Contacto</a>
+			<a href="/mapa" class="link link-hover">Localización</a>
 			</div>
-		</footer>
+		</div>
+	  
+		  <div>
+			<div class="flex flex-col">
+			<span class="footer-title">Legal</span>
+			<a href="/tos" class="link link-hover">Términos de uso</a>
+			<a href="/privacidad" class="link link-hover">Política de privacidad</a>
+		    </div>
+		  </div>
+		</div>
+	  </footer>
+	  
 </div>  
 <style>
 	@keyframes gradientShift {

@@ -1,0 +1,91 @@
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import { page } from '$app/stores'; // Import to access URL parameters
+  import { error } from '@sveltejs/kit'; // Import if you wish to use SvelteKit's error handling
+  
+  const baseURL = 'http://168.138.133.221:1337'; // Make sure this matches your actual API base URL
+
+  // Define your interfaces/types here
+  interface Foto {
+    data: {
+      attributes: {
+        url: string;
+      };
+    }[] | null;
+  }
+
+  interface ProductoAttributes {
+    nombre: string;
+    descripcion: string;
+    precio: number;
+    slug: string;
+    foto: Foto;
+  }
+
+  interface Producto {
+    id: number;
+    attributes: ProductoAttributes;
+  }
+
+  interface MarcaAttributes {
+    Nombre: string;
+    slug: string;
+    productos: {
+      data: Producto[];
+    };
+  }
+
+  interface Marca {
+    id: number;
+    attributes: MarcaAttributes;
+  }
+
+  let marca: Marca | null = null;
+  let loading: boolean = true;
+
+  $: slug = $page.params.slug; // Reactively get the slug from the page URL
+
+  onMount(async () => {
+    try {
+      const response = await fetch(`${baseURL}/api/marcas?filters[slug]=${slug}&populate=*`);
+      if (!response.ok) {
+        throw error(response.status, `API fetch failed: ${response.statusText}`);
+      }
+      const data = await response.json();
+      if (data.data.length > 0) {
+        marca = data.data[0];
+      } else {
+        throw error(404, 'No data found for this slug');
+      }
+    } catch (e) {
+      console.error('Fetch error:', e.message);
+    } finally {
+      loading = false;
+    }
+  });
+</script>
+
+{#if loading}
+  <p>Loading...</p>
+{:else if marca}
+  <div class="container mx-auto">
+    <h1 class="text-4xl font-bold text-center my-10">{marca.attributes.Nombre}</h1>
+    {#each marca.attributes.productos.data as producto}
+      <div class="card">
+          <div class="card bg-base-100 shadow-xl">
+              <figure class="h-96 bg-gray-200">
+                <img src="/default-placeholder.png" alt={producto.attributes.nombre} class="object-cover h-full w-full" />
+                <!-- Adjust image src based on your actual product image structure -->
+             </figure>
+          </div>
+      </div>    
+      <div class="card-body bg-base-100">
+          <h2 class="card-title text-2xl font-bold">{producto.attributes.nombre}</h2>
+          <p class="my-4">{producto.attributes.descripcion}</p>
+          <span class="text-lg font-bold">Precio: ₲{producto.attributes.precio}</span>
+        </div>
+    {/each}
+  </div>
+{:else}
+  <p>No data found for this slug.</p>
+{/if}

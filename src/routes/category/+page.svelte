@@ -52,7 +52,7 @@
     });
 </script>
   
-  <div data-theme="emerald" class="container px-4 mx-auto">
+  <div data-theme="emerald" class="container px-4 mx-au bg-transparent">
     <h1 class="text-4xl font-bold text-center my-10">Categorías</h1>
     
     <!-- Categories Section -->
@@ -61,15 +61,15 @@
         <h2 class="text-2xl font-bold mb-6">{category.attributes.categoria}</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {#each category.attributes.productos.data as producto}
-            <a href={`/productos/${producto.attributes.slug}`} class="card card-compact bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300" sveltekit:prefetch>
-              <figure class="h-48 bg-gray-200">
+            <a href={`/productos/${producto.attributes.slug}`} class="card card-compact shadow-xl hover:shadow-2xl transition-shadow duration-300" sveltekit:prefetch>
+              <figure class="h-48">
                 <img src={producto.attributes.foto?.data?.[0]?.attributes?.url || "/default-placeholder.png"} alt={producto.attributes.nombre} class="object-cover h-full w-full" />
               </figure>
               <div class="card-body">
                 <h3 class="card-title">{producto.attributes.nombre}</h3>
                 <div class="flex justify-between items-center mt-4">
                   <span class="text-lg font-bold">${producto.attributes.precio}</span>
-                  <button class="btn btn-primary">Contactar</button>
+                  <button class="btn btn-primary">Ver</button>
                 </div>
               </div>
             </a>
